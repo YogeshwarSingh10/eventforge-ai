@@ -19,6 +19,7 @@ EventForge models this as a **Directed Acyclic Graph (DAG)** of agents:
 
 ## 🧠 Architecture
 
+```text
 .
 ├── app.py                  # (optional UI entry point)
 ├── docs/                   # engineering notes
@@ -45,7 +46,7 @@ EventForge models this as a **Directed Acyclic Graph (DAG)** of agents:
 │   ├── utils/              # logging, LLM client
 │   │
 │   └── main.py             # CLI entry point
-
+```
 ---
 
 
