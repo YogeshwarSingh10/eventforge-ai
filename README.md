@@ -113,4 +113,4 @@ These abstract web search and can be extended to real APIs (Tavily, SerpAPI, etc
 
 ```bash
 pip install -e .
-python src/eventforge/main.py
+python src/eventforge/app.py
