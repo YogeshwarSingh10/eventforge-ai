@@ -18,6 +18,7 @@ EventForge models this as a **Directed Acyclic Graph (DAG)** of agents:
 ---
 
 ## 🧠 Architecture
+
 .
 ├── app.py                  # (optional UI entry point)
 ├── docs/                   # engineering notes
@@ -32,7 +33,7 @@ EventForge models this as a **Directed Acyclic Graph (DAG)** of agents:
 │   │   ├── pricing_agent.py
 │   │   └── final_agent.py
 │   │
-│   ├── graph/              # LangGraph builder (DAG)
+│   ├── graph/              # LangGraph DAG builder
 │   │   └── builder.py
 │   │
 │   ├── models/             # schemas + state definitions
