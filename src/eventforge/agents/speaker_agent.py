@@ -46,7 +46,12 @@ class SpeakerAgent(BaseAgent):
             - Provide title and company
             - Assign influence_score (0-1)
             - Suggest a talk topic relevant to the conference
-            - Provide a short bio summary (2–3 lines)
+            - Provide a short bio summary (2-3 lines)
+
+            IMPORTANT:
+            - Avoid unrealistic speakers (e.g. CEOs of Google, Meta)
+            - Prefer regionally relevant speakers
+            - Match audience size and event scale
             """)
         ])
 

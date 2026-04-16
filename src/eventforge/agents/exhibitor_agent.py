@@ -1,14 +1,67 @@
-from eventforge.models.state import ConferenceState
+from typing import Dict, Any
 
-async def run_exhibitor_agent(state: ConferenceState) -> dict:
-    """
-    Reads:  state["conference_input"]
-    Writes: {"exhibitors": ExhibitorAgentOutput}
+from langchain_core.prompts import ChatPromptTemplate
 
-    Steps:
-        1. Call query_past_events() for exhibitor data in past events
-        2. Call call_llm(..., response_model=ExhibitorAgentOutput)
-           Ask Claude to cluster and recommend exhibitors by type
-        3. Return {"exhibitors": result}
-    """
-    ...
+from eventforge.agents.base.base_agent import BaseAgent
+from eventforge.models.schemas import ConferenceInput, ExhibitorAgentOutput
+from eventforge.utils.llm_client import get_llm
+from eventforge.tools.web_search import search_exhibitors
+from eventforge.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+
+class ExhibitorAgent(BaseAgent):
+
+    def __init__(self):
+        super().__init__("exhibitor_agent")
+
+        self.llm = get_llm().with_structured_output(
+            ExhibitorAgentOutput,
+            method="json_schema",
+            strict=True
+        )
+
+        self.prompt = ChatPromptTemplate.from_messages([
+            ("system", 
+             "You are an expert in conference exhibitor planning."),
+
+            ("user", 
+             """
+            Conference Details:
+            Category: {category}
+            Geography: {geography}
+
+            Search Results:
+            {search_results}
+
+            TASK:
+            - Select top 5 exhibitors
+            - Assign UNIQUE id
+            - Categorize each as: startup / enterprise / tools
+            - Provide short description
+            """)
+        ])
+
+    async def run(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            logger.info("ExhibitorAgent started")
+
+            input_data = ConferenceInput(**state["input"])
+
+            query = f"{input_data.category} conference exhibitors in {input_data.geography}"
+            search_results = await search_exhibitors.ainvoke(query)
+
+            chain = self.prompt | self.llm
+
+            result = await chain.ainvoke({
+                "category": input_data.category,
+                "geography": input_data.geography,
+                "search_results": search_results
+            })
+
+            return self._success(result)
+
+        except Exception as e:
+            logger.exception("ExhibitorAgent failed")
+            return self._fail(e)

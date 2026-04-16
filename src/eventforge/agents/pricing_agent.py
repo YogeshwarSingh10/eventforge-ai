@@ -45,6 +45,12 @@ class PricingAgent(BaseAgent):
             - Estimate expected conversions per tier
             - Estimate total attendance
             - Estimate total revenue
+
+            CONSTRAINTS:
+            - Total attendance <= audience_size
+            - Revenue = sum(price * conversions)
+            - Ensure realistic conversion distribution
+            - Ticket prices must align with that geography's conferences (e.g. ₹1000-₹10000 range equivalent in India)
             """)
         ])
 

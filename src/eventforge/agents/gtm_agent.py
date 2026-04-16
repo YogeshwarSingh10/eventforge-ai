@@ -1,15 +1,72 @@
-from eventforge.models.state import ConferenceState
+from typing import Dict, Any
 
-async def run_gtm_agent(state: ConferenceState) -> dict:
-    """
-    Reads:  state["conference_input"]  (category, geography)
-    Writes: {"gtm": GTMAgentOutput}
+from langchain_core.prompts import ChatPromptTemplate
 
-    Steps:
-        1. Call query_communities(category, geography)
-        2. Call call_llm(..., response_model=GTMAgentOutput)
-           Give Claude the community list, ask it to generate
-           promotion messages and a distribution plan
-        3. Return {"gtm": result}
-    """
-    ...
+from eventforge.agents.base.base_agent import BaseAgent
+from eventforge.models.schemas import ConferenceInput, GTMAgentOutput
+from eventforge.utils.llm_client import get_llm
+from eventforge.tools.web_search import search_communities
+from eventforge.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+
+class GTMAgent(BaseAgent):
+
+    def __init__(self):
+        super().__init__("gtm_agent")
+
+        self.llm = get_llm().with_structured_output(
+            GTMAgentOutput,
+            method="json_schema",
+            strict=True
+        )
+
+        self.prompt = ChatPromptTemplate.from_messages([
+            ("system", 
+             "You are an expert in event marketing and growth strategy."),
+
+            ("user", 
+             """
+            Conference Details:
+            Category: {category}
+            Geography: {geography}
+
+            Search Results:
+            {search_results}
+
+            TASK:
+            - Identify top communities (Discord, LinkedIn, Meetup, etc.)
+            - Assign UNIQUE id
+            - Provide platform and niche
+            - Generate promotion message
+            - Assign recommended order (1 = highest priority)
+
+            Also provide a short GTM summary.
+            """)
+        ])
+
+    async def run(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            logger.info("GTMAgent started")
+
+            input_data = ConferenceInput(**state["input"])
+
+            query = f"{input_data.category} communities in {input_data.geography}"
+            search_results = await search_communities.ainvoke(query)
+
+            chain = self.prompt | self.llm
+
+            result = await chain.ainvoke(
+                {
+                    "category": input_data.category,
+                    "geography": input_data.geography,
+                    "search_results": search_results,
+                }
+            )
+
+            return self._success(result)
+
+        except Exception as e:
+            logger.exception("GTMAgent failed")
+            return self._fail(e)

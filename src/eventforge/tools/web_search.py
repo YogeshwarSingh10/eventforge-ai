@@ -65,10 +65,8 @@ async def _search(query: str, max_results: int = 5) -> str:
     response = await loop.run_in_executor(
         None,
         lambda: client.search(
-            query=query,
-            max_results=max_results,
-            search_depth="advanced"
-        )
+            query=query, max_results=max_results, search_depth="advanced"
+        ),
     )
 
     results = response.get("results", [])
@@ -78,6 +76,8 @@ async def _search(query: str, max_results: int = 5) -> str:
     for r in results:
         title = r.get("title", "")
         content = r.get("content", "")
+        if len(content) < 50:       #Skip garbage/short entries
+            continue
         formatted.append(f"- {title}: {content[:200]}")
 
     return "\n".join(formatted)
@@ -87,13 +87,14 @@ async def _search(query: str, max_results: int = 5) -> str:
 # TOOLS
 # ─────────────────────────────────────────────
 
+
 @tool
 async def search_sponsors(query: str) -> str:
     """
     Search for companies that sponsor conferences.
     Input:
         query: Should include category and geography.
-    
+
     Returns:
         A concise list of relevant sponsor companies with brief descriptions.
     """
@@ -106,7 +107,7 @@ async def search_speakers(query: str) -> str:
     Search for relevant conference speakers.
     Input:
         query: Should include category and geography.
-    
+
     Returns:
         A concise list of relevant sponsor companies with brief descriptions.
     """
@@ -125,3 +126,34 @@ async def search_venues(query: str) -> str:
         capacities, and key details.
     """
     return await _search(f"{query} large conference venues capacity")
+
+
+@tool
+async def search_exhibitors(query: str) -> str:
+    """
+    Search for companies that exhibit at conferences.
+    Input:
+        query: Should include category and geography.
+
+    Returns:
+        A concise list of relevant exhibitor companies with brief descriptions.
+    """
+    return await _search(
+        f"{query} conference exhibitors companies startup tools booths"
+    )
+
+
+@tool
+async def search_communities(query: str) -> str:
+    """
+    Search for communities where the event can be promoted.
+    Input:
+        query: Should include category and geography.
+
+    Returns:
+        A concise list of relevant online communities (Discord, LinkedIn, Meetup, etc.)
+        suitable for promoting the event.
+    """
+    return await _search(
+        f"{query} communities discord linkedin meetup groups tech communities"
+    )

@@ -1,5 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 
+from eventforge.agents.exhibitor_agent import ExhibitorAgent
+from eventforge.agents.gtm_agent import GTMAgent
 from eventforge.agents.pricing_agent import PricingAgent
 from eventforge.agents.venue_agent import VenueAgent
 from eventforge.models.state import ConferenceState
@@ -18,6 +20,8 @@ def build_graph():
     speaker = SpeakerAgent()
     venue = VenueAgent()
     pricing = PricingAgent()
+    exhibitor = ExhibitorAgent()
+    gtm = GTMAgent()
     final = FinalAgent()
 
     # ---- Nodes ----
@@ -25,6 +29,8 @@ def build_graph():
     graph.add_node("speaker_agent", speaker.run)
     graph.add_node("venue_agent", venue.run)
     graph.add_node("pricing_agent", pricing.run)
+    graph.add_node("exhibitor_agent", exhibitor.run)
+    graph.add_node("gtm_agent", gtm.run)
     # graph.add_node("join", join_node)
     graph.add_node("final_agent", final.run)
 
@@ -32,12 +38,16 @@ def build_graph():
     graph.add_edge(START, "sponsor_agent")
     graph.add_edge(START, "speaker_agent")
     graph.add_edge(START, "venue_agent")
+    graph.add_edge(START, "exhibitor_agent")
+    graph.add_edge(START, "gtm_agent")
     
+
     # ---- dependency ----
     graph.add_edge("venue_agent", "pricing_agent")
 
+    # ---- final join ----
     graph.add_edge(
-        ["sponsor_agent", "speaker_agent", "pricing_agent"],
+        ["sponsor_agent", "speaker_agent", "pricing_agent", "exhibitor_agent", "gtm_agent"],
         "final_agent"
     )
     

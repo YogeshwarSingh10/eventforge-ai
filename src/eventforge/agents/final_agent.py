@@ -17,5 +17,7 @@ class FinalAgent(BaseAgent):
                 speakers=state["outputs"]["speaker_agent"],
                 venues=state["outputs"]["venue_agent"],
                 pricing=state["outputs"]["pricing_agent"],
+                exhibitors=state["outputs"]["exhibitor_agent"],
+                gtm=state["outputs"]["gtm_agent"],
             )
         )

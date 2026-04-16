@@ -44,15 +44,15 @@ class SpeakerAgentOutput(BaseModel):
     speakers: list[Speaker]
 
 
-# class Exhibitor(ScoredItem):
-#     id: str
-#     name: str
-#     category: str
-#     description: str
+class Exhibitor(ScoredItem):
+    id: str
+    name: str
+    category: str
+    description: str
 
 
-# class ExhibitorAgentOutput(BaseModel):
-#     exhibitors: List[Exhibitor]
+class ExhibitorAgentOutput(BaseModel):
+    exhibitors: List[Exhibitor]
 
 
 class Venue(BaseModel):
@@ -81,18 +81,18 @@ class PricingAgentOutput(BaseModel):
     predicted_revenue_usd: int
 
 
-# class CommunityPromotion(ScoredItem):
-#     id: str
-#     community_name: str
-#     platform: str
-#     niche: str
-#     message_draft: str
-#     recommended_post_date: str
+class CommunityPromotion(ScoredItem):
+    id: str
+    community_name: str
+    platform: str
+    niche: str
+    message_draft: str
+    recommended_post_date: str
 
 
-# class GTMAgentOutput(BaseModel):
-#     promotions: List[CommunityPromotion]
-#     gtm_summary: str
+class GTMAgentOutput(BaseModel):
+    promotions: List[CommunityPromotion]
+    gtm_summary: str
 
 
 # class AgendaSlot(BaseModel):
@@ -119,3 +119,5 @@ class ConferencePlan(BaseModel):
     speakers: SpeakerAgentOutput
     venues: VenueAgentOutput
     pricing: PricingAgentOutput
+    exhibitors: ExhibitorAgentOutput
+    gtm: GTMAgentOutput
