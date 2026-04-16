@@ -1,6 +1,6 @@
 from typing import Dict, Any
 import pandas as pd
-import os
+from pathlib import Path
 
 from eventforge.agents.base.base_agent import BaseAgent
 from eventforge.models.schemas import ConferenceInput, VenueAgentOutput, Venue
@@ -15,17 +15,17 @@ class VenueAgent(BaseAgent):
     def __init__(self):
         super().__init__("venue_agent")
 
-        # ---- AUTO-DETECT DELIMITER ----
-        self.venues_df = pd.read_csv("data/venues.csv", sep="\t")
+        # ---- RESOLVE PATH RELATIVE TO PROJECT ----
+        BASE_DIR = Path(__file__).resolve().parents[1]  # backend/
+        VENUES_PATH = BASE_DIR / "data" / "venues.csv"
+
+        # ---- LOAD CSV ----
+        self.venues_df = pd.read_csv(VENUES_PATH, sep="\t")
 
         # ---- CLEAN COLUMN NAMES ----
-        self.venues_df.columns = (
-            self.venues_df.columns
-            .str.strip()
-            .str.lower()
-        )
+        self.venues_df.columns = self.venues_df.columns.str.strip().str.lower()
 
-        logger.info(f"Loaded venues from: data/venues.csv")
+        logger.info(f"Loaded venues from: {VENUES_PATH}")
         logger.info(f"Columns: {self.venues_df.columns.tolist()}")
 
     async def run(self, state: Dict[str, Any]) -> Dict[str, Any]:
@@ -48,18 +48,12 @@ class VenueAgent(BaseAgent):
             budget = input_data.budget_constraint
 
             # ---- GEO FILTER (CITY OR COUNTRY) ----
-            df_filtered = df[
-                (df["city"] == geo) |
-                (df["country"] == geo)
-            ]
+            df_filtered = df[(df["city"] == geo) | (df["country"] == geo)]
 
             fallback_needed = False
 
             # ---- GEO FILTER ----
-            df_geo = df[
-                (df["city"] == geo) |
-                (df["country"] == geo)
-            ]
+            df_geo = df[(df["city"] == geo) | (df["country"] == geo)]
 
             if df_geo.empty:
                 logger.warning("No geo match")
@@ -68,14 +62,11 @@ class VenueAgent(BaseAgent):
                 df_filtered = df_geo
 
                 # ---- BUDGET FILTER ----
-                df_filtered = df_filtered[
-                    df_filtered["price_per_day"] <= budget
-                ]
+                df_filtered = df_filtered[df_filtered["price_per_day"] <= budget]
 
                 if df_filtered.empty:
                     logger.warning("No venues within budget")
                     fallback_needed = True
-
 
             # ---- SCORING ----
             if not df_filtered.empty:
@@ -85,14 +76,12 @@ class VenueAgent(BaseAgent):
                     price_score = 1 / (row["price_per_day"] + 1)
                     budget_fit = 1 - (row["price_per_day"] / (budget + 1))
 
-                    return (
-                        0.5 * capacity_score +
-                        0.3 * budget_fit +
-                        0.2 * price_score
-                    )
+                    return 0.5 * capacity_score + 0.3 * budget_fit + 0.2 * price_score
 
                 df_filtered["score"] = df_filtered.apply(score, axis=1)
-                df_filtered = df_filtered.sort_values(by="score", ascending=False).head(5)
+                df_filtered = df_filtered.sort_values(by="score", ascending=False).head(
+                    5
+                )
 
             venues = []
 
@@ -114,7 +103,9 @@ class VenueAgent(BaseAgent):
             if not venues:
                 logger.warning("No venues found → using Tavily search")
 
-                query = f"{input_data.category} conference venues in {input_data.geography}"
+                query = (
+                    f"{input_data.category} conference venues in {input_data.geography}"
+                )
                 search_results = await search_venues_structured(query)
 
                 state["shared_memory"]["venue_search"] = search_results
@@ -126,7 +117,7 @@ class VenueAgent(BaseAgent):
                         geography=input_data.geography,
                         capacity=0,
                         price_per_day=0,
-                        score=0.5
+                        score=0.5,
                     )
                     for i, r in enumerate(search_results)
                 ]
@@ -137,6 +128,7 @@ class VenueAgent(BaseAgent):
 
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             logger.exception("VenueAgent failed")
             return self._fail(e)
