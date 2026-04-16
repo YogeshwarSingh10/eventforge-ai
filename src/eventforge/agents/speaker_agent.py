@@ -8,6 +8,7 @@ from eventforge.utils.logging import get_logger
 from eventforge.models.schemas import ConferenceInput, SpeakerAgentOutput
 from eventforge.utils.llm_client import get_llm
 from eventforge.tools.web_search import search_speakers
+from eventforge.utils.validator import clean_speakers
 
 logger = get_logger(__name__)
 
@@ -98,6 +99,8 @@ class SpeakerAgent(BaseAgent):
             )
 
             logger.info("LLM returned and parsed successfully")
+
+            result.speakers = clean_speakers(result.speakers)
 
             return self._success(result)
 

@@ -16,7 +16,10 @@ Supported providers (set LLM_BASE_URL accordingly):
 import os
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+from pathlib import Path
+
 load_dotenv()
+
 
 def get_llm() -> ChatOpenAI:
     return ChatOpenAI(

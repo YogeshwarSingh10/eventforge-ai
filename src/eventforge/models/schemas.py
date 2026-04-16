@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, List, Dict
 
-
 # ── INPUT ──────────────────────────────────────
 class ConferenceInput(BaseModel):
     category: str
@@ -76,8 +75,12 @@ class PricingTier(BaseModel):
 
 
 class PricingAgentOutput(BaseModel):
-    tiers: List[PricingTier]
+    # model-driven
+    baseline_price_usd: int
     predicted_attendance: int
+
+    # LLM-structured plan
+    tiers: List[PricingTier]
     predicted_revenue_usd: int
 
 
@@ -95,20 +98,19 @@ class GTMAgentOutput(BaseModel):
     gtm_summary: str
 
 
-# class AgendaSlot(BaseModel):
-#     slot_id: str
-#     day: int
-#     start_time: str
-#     end_time: str
-#     session_title: str
-#     speaker_id: str  
-#     room: str
+class AgendaSlot(BaseModel):
+    speaker: str
+    topic: str
+    room: str
+    room_capacity: int
+    start: str
+    end: str
 
 
-# class OpsAgentOutput(BaseModel):
-#     agenda: List[AgendaSlot]
-#     conflicts_detected: List[str]
-#     rooms_used: List[str]
+class OpsAgentOutput(BaseModel):
+    schedule: List[AgendaSlot]
+    rooms: List[Dict]
+    conflicts: List[Dict]
 
 
 # ── FINAL OUTPUT (FLEXIBLE) ─────────────────────
@@ -120,4 +122,5 @@ class ConferencePlan(BaseModel):
     venues: VenueAgentOutput
     pricing: PricingAgentOutput
     exhibitors: ExhibitorAgentOutput
+    ops: OpsAgentOutput
     gtm: GTMAgentOutput

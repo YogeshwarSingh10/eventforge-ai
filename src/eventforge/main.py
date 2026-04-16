@@ -34,6 +34,8 @@ async def main():
     duration_days = _safe_int_input(
         "Enter duration in days (default = 1): ", optional=True
     )
+    if duration_days is None:
+        duration_days = 1
 
     state = {
         "input": {

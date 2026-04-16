@@ -7,6 +7,7 @@ from eventforge.utils.logging import get_logger
 from eventforge.models.schemas import ConferenceInput, VenueAgentOutput
 from eventforge.utils.llm_client import get_llm
 from eventforge.tools.web_search import search_venues
+from eventforge.utils.validator import clean_venues
 
 logger = get_logger(__name__)
 
@@ -64,6 +65,10 @@ class VenueAgent(BaseAgent):
                     "search_results": search_results,
                 }
             )
+            
+            logger.info("LLM returned and parsed successfully")
+            
+            result.venues = clean_venues(result.venues, input_data.audience_size)
 
             return self._success(result)
 

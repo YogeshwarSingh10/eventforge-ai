@@ -7,6 +7,7 @@ from eventforge.models.schemas import ConferenceInput, ExhibitorAgentOutput
 from eventforge.utils.llm_client import get_llm
 from eventforge.tools.web_search import search_exhibitors
 from eventforge.utils.logging import get_logger
+from eventforge.utils.validator import clean_exhibitors
 
 logger = get_logger(__name__)
 
@@ -40,7 +41,7 @@ class ExhibitorAgent(BaseAgent):
             - Assign UNIQUE id
             - Categorize each as: startup / enterprise / tools
             - Provide short description
-            - Only include real companies
+            - Only include real companies or startups
             - Avoid invalid or noisy names
 
             RULES:
@@ -68,6 +69,10 @@ class ExhibitorAgent(BaseAgent):
                 "geography": input_data.geography,
                 "search_results": search_results
             })
+
+            logger.info("LLM returned and parsed successfully")
+            
+            result.exhibitors = clean_exhibitors(result.exhibitors)
 
             return self._success(result)
 
