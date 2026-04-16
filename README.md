@@ -1,19 +1,12 @@
-# EventForge AI
+# 🚀 EventForge AI
 
-EventForge is a multi-agent conference planning system built using **LangGraph**.  
-It decomposes conference organization into specialized AI agents that run in parallel and coordinate through a shared state.
+**EventForge AI** is a multi-agent system that automates end-to-end conference planning -- from sponsors and speakers to venues, pricing, operations, and go-to-market strategy.
 
 ---
 
-## 🚀 Overview
+## ✨ Overview
 
-Planning a large conference involves multiple independent but interconnected decisions — sponsors, speakers, venue, pricing, etc.
-
-EventForge models this as a **Directed Acyclic Graph (DAG)** of agents:
-- Each agent solves a specific subproblem
-- Agents run **asynchronously and in parallel**
-- Dependencies are explicitly modeled
-- Outputs are merged into a final structured plan
+Planning a conference involves multiple interdependent decisions across sponsorships, speakers, logistics, and pricing. EventForge AI solves this using **specialized agents** coordinated via a DAG, producing a structured, data-driven event plan in seconds.
 
 ---
 
@@ -21,96 +14,158 @@ EventForge models this as a **Directed Acyclic Graph (DAG)** of agents:
 
 ```text
 .
-├── app.py                  # (optional UI entry point)
-├── docs/                   # engineering notes
-├── notebooks/              # experimentation (pricing, etc.)
-├── pyproject.toml
-├── src/eventforge/
-│   ├── agents/             # all agent implementations
-│   │   ├── base/           # BaseAgent abstraction
-│   │   ├── sponsor_agent.py
-│   │   ├── speaker_agent.py
-│   │   ├── venue_agent.py
-│   │   ├── pricing_agent.py
-│   │   └── final_agent.py
-│   │
-│   ├── graph/              # LangGraph DAG builder
-│   │   └── builder.py
-│   │
-│   ├── models/             # schemas + state definitions
-│   │   ├── schemas.py
-│   │   └── state.py
-│   │
-│   ├── tools/              # external tools (web search, etc.)
-│   │
-│   ├── utils/              # logging, LLM client
-│   │
-│   └── main.py             # CLI entry point
+├── app.py                         # Streamlit UI (interactive demo + live agent streaming)
+├── eventforge_graph.png           # Visualized LangGraph DAG (generated via Mermaid)
+├── pyproject.toml                 # Dependencies + packaging config
+├── README.md                      # Project overview, setup, usage
+
+└── src/
+    └── eventforge/
+    
+        ├── main.py                # CLI entrypoint (runs pipeline without UI)
+
+        ├── graph/
+        │   ├── builder.py         # Core DAG definition (LangGraph orchestration)
+        │   └── nodes.py           # (Optional) shared node utilities / abstractions
+
+        ├── agents/
+        │   ├── base/
+        │   │   ├── base_agent.py      # Abstract agent class (state-in → state-out contract)
+        │   │   └── agent_registry.py  # (Optional) agent lookup / extensibility layer
+        │   │
+        │   ├── sponsor_agent.py   # Finds relevant sponsors
+        │   ├── speaker_agent.py   # Recommends speakers
+        │   ├── venue_agent.py     # Filters + ranks venues (data + scoring)
+        │   ├── pricing_agent.py   # Pricing strategy + revenue estimation
+        │   ├── ops_agent.py       # Scheduling + logistics planning
+        │   ├── exhibitor_agent.py # Suggests exhibitors for booths
+        │   ├── gtm_agent.py       # Go-to-market / promotion strategy
+        │   └── final_agent.py     # Aggregates all agent outputs → final plan
+
+        ├── models/
+        │   ├── schemas.py         # Pydantic schemas for agent outputs
+        │   ├── state.py           # Shared global state (LangGraph memory)
+        │   └── pricing_model.py   # Pricing heuristics / calculations
+
+        ├── tools/
+        │   ├── web_search.py      # Tavily-based async search tools
+        │   └── data_loader.py     # Dataset loading utilities (venues/events)
+
+        ├── utils/
+        │   ├── llm_client.py      # LLM factory (OpenRouter / Groq / etc.)
+        │   ├── logging.py         # Structured logging (terminal + debug)
+        │   ├── grounding.py       # Builds grounded context from search results
+        │   └── validator.py       # Output cleaning + validation helpers
+
+        └── data/
+            ├── venues.csv         # Structured venue dataset (used by VenueAgent)
+            └── events.csv         # (Optional) reference/historical events
+  
 ```
+
+## 📊 Execution Graph
+
+![EventForge Graph](eventforge_graph.png)
 ---
 
+## 🧠 Key Features
 
-### Execution Logic
+- 🤖 **Multi-Agent System**
+  - Sponsor Agent → sponsor discovery
+  - Speaker Agent → speaker recommendations
+  - Venue Agent → venue selection (data + scoring)
+  - Pricing Agent → pricing + revenue modeling
+  - Ops Agent → scheduling + logistics
+  - Exhibitor Agent → exhibitor suggestions
+  - GTM Agent → marketing & distribution
+  - Final Agent → aggregation layer  
 
-- **Parallel stage**: Sponsor, Speaker, Venue  
-- **Dependent stage**: Pricing (requires venue)  
-- **Aggregation stage**: Final agent combines all outputs  
+- ⚡ Parallel + dependency-aware execution
+- 📊 Structured, explainable outputs  
+- 🔄 Modular and extensible design  
+
+---
+
+## ⚙️ How It Works
+User Input → LangGraph DAG → Parallel Agents → Dependency Resolution → Final Aggregation
+
+1. User provides event details (type, budget, attendees, location)  
+2. Agents run in parallel to solve specific tasks  
+3. Dependency-aware nodes (pricing, ops) execute after required inputs
+4. Final agent aggregates all outputs into a unified plan 
+
+---
+
+## 📥 Input
+
+- Conference category
+- Geography
+- Audience size
+- Budget (optional)
+- Duration (optional)
+
+---
+
+## 📤 Output
+
+A complete AI-generated event plan including:
+
+- 🤝 Sponsors
+- 🎤 Speakers
+- 🏛️ Venues
+- 🧩 Exhibitors
+- 💰 Pricing strategy
+- 📅 Event schedule (ops)
+- 📣 Go-to-market strategy 
 
 ---
 
 ## ⚙️ Tech Stack
 
-- **LangGraph** → DAG orchestration  
-- **LangChain** → prompts, tools, chaining  
-- **Pydantic** → strict structured outputs  
-- **Async Python** → concurrency  
-- **LLM APIs** → reasoning + generation  
-- **Custom Tools** → web search integration  
+- LangGraph (multi-agent orchestration)
+- LangChain (LLM abstractions)
+- Pydantic (structured outputs)
+- Streamlit (UI)
+- Async Python (parallel execution)
+- Tavily API (web search grounding)
 
 ---
 
-## 🔧 System Components
+## 🚀 Getting Started
 
-### Agents
+### 1. Clone the repository
+```bash
+git clone https://github.com/odysseus7X/eventforge-ai.git
+cd eventforge-ai
+```
 
-| Agent | Responsibility |
-|------|--------|
-| SponsorAgent | Find & rank sponsors |
-| SpeakerAgent | Curate speakers |
-| VenueAgent | Select venues |
-| PricingAgent | Generate pricing tiers |
-| FinalAgent | Aggregate outputs |
-
----
-
-### State Management
-
-All agents interact through a shared state:
-
-- `input` → immutable user input  
-- `outputs` → agent outputs (merged)  
-- `agent_meta` → execution status  
-- `shared_memory` → optional intermediate storage  
-- `errors` → collected failures  
-
-LangGraph reducers handle merging safely across parallel nodes.
-
----
-
-### Tools
-
-Agents use tools for external grounding:
-
-- `search_sponsors`
-- `search_speakers`
-- `search_venues`
-
-These abstract web search and can be extended to real APIs (Tavily, SerpAPI, etc.)
-
----
-
-## ▶️ Running the Project
-
+### 2. Install Dependencies
 ```bash
 pip install -e .
-python src/eventforge/app.py
+```
+
+### 3. Set up environment variables
+Create a .env file
+```bash
+LLM_API_KEY=your_llm_key
+LLM_MODEL=openai/gpt-4o-mini
+LLM_BASE_URL=https://openrouter.ai/api/v1
+
+TAVILY_API_KEY=your_tavily_key
+```
+
+### 4. Run the application
+
+
+-🖥️ Streamlit UI
+```bash
+streamlit run app.py
+```
+
+-💻CLI (terminal execution)
+```bash
+python src/eventforge/main.py
+```
+
+## 🧠 One-line summary
+#### Modular multi-agent system where independent agents coordinate via a shared state graph to generate a complete event plan.
