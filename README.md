@@ -2,6 +2,8 @@
 
 **EventForge AI** is a multi-agent system that automates end-to-end conference planning -- from sponsors and speakers to venues, pricing, operations, and go-to-market strategy.
 
+🔗 **Live Demo:** https://eventforge-ai-egnipyiaezrmy9e2q9cvyx.streamlit.app/ 
+
 ---
 
 ## ✨ Overview
